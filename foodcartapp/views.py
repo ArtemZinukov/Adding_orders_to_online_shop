@@ -1,8 +1,11 @@
+import json
+
 from django.http import JsonResponse
 from django.templatetags.static import static
+from django.shortcuts import get_object_or_404
 
 
-from .models import Product
+from .models import Product, Order, OrderProduct
 
 
 def banners_list_api(request):
@@ -58,5 +61,29 @@ def product_list_api(request):
 
 
 def register_order(request):
-    # TODO это лишь заглушка
-    return JsonResponse({})
+    try:
+        order_data = json.loads(request.body.decode())
+        order = Order(
+            firstname=order_data['firstname'],
+            lastname=order_data['lastname'],
+            phonenumber=order_data['phonenumber'],
+            address=order_data['address']
+        )
+        order.save()
+        for profuct in order_data['products']:
+            product_id = profuct['product']
+            quantity = profuct['quantity']
+            product = get_object_or_404(Product, id=product_id)
+            order_product = OrderProduct(
+                order=order,
+                product=product,
+                quantity=quantity
+            )
+            order_product.save()
+
+        return JsonResponse({'message': 'Заказ успешно создан!', 'order_id': order.id}, status=201)
+
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Неверный формат JSON'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
