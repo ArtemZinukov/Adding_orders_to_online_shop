@@ -3,6 +3,8 @@ import json
 from django.http import JsonResponse
 from django.templatetags.static import static
 from django.shortcuts import get_object_or_404
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
 
 from .models import Product, Order, OrderProduct
@@ -60,30 +62,30 @@ def product_list_api(request):
     })
 
 
+@api_view(['POST'])
 def register_order(request):
     try:
-        order_data = json.loads(request.body.decode())
-        order = Order(
+        order_data = request.data
+
+        order = Order.objects.create(
             firstname=order_data['firstname'],
             lastname=order_data['lastname'],
             phonenumber=order_data['phonenumber'],
             address=order_data['address']
         )
-        order.save()
-        for profuct in order_data['products']:
-            product_id = profuct['product']
-            quantity = profuct['quantity']
-            product = get_object_or_404(Product, id=product_id)
-            order_product = OrderProduct(
+
+        for product in order_data['products']:
+            product_id = product['product']
+            quantity = product['quantity']
+            product_instance = get_object_or_404(Product, id=product_id)
+
+            OrderProduct.objects.create(
                 order=order,
-                product=product,
+                product=product_instance,
                 quantity=quantity
             )
-            order_product.save()
 
-        return JsonResponse({'message': 'Заказ успешно создан!', 'order_id': order.id}, status=201)
+        return Response({'message': 'Заказ успешно создан!', 'order_id': order.id}, status=201)
 
-    except json.JSONDecodeError:
-        return JsonResponse({'error': 'Неверный формат JSON'}, status=400)
     except Exception as e:
-        return JsonResponse({'error': str(e)}, status=500)
+        return Response({'error': str(e)}, status=500)
