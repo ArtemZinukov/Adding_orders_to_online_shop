@@ -4,6 +4,7 @@ from django.http import JsonResponse
 from django.templatetags.static import static
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view
+from rest_framework import status
 from rest_framework.response import Response
 
 
@@ -67,6 +68,8 @@ def register_order(request):
     try:
         order_data = request.data
 
+        if 'products' not in order_data or not order_data['products']:
+            return Response({'error': 'Список продуктов не может быть пустым.'}, status=status.HTTP_400_BAD_REQUEST)
         order = Order.objects.create(
             firstname=order_data['firstname'],
             lastname=order_data['lastname'],
@@ -85,7 +88,7 @@ def register_order(request):
                 quantity=quantity
             )
 
-        return Response({'message': 'Заказ успешно создан!', 'order_id': order.id}, status=201)
+        return Response({'message': 'Заказ успешно создан!', 'order_id': order.id}, status=status.HTTP_201_CREATED)
 
     except Exception as e:
         return Response({'error': str(e)}, status=500)
