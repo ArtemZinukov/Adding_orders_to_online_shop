@@ -24,7 +24,7 @@ class OrderProductSerializer(ModelSerializer):
 
 
 class OrderSerializer(ModelSerializer):
-    products = ListField(child=OrderProductSerializer())
+    products = ListField(child=OrderProductSerializer(), write_only=True)
 
     class Meta:
         model = Order
@@ -108,5 +108,5 @@ def register_order(request):
             product=product_instance,
             quantity=product['quantity']
         )
-
-    return Response({'message': 'Заказ успешно создан!', 'order_id': order.id}, status=status.HTTP_201_CREATED)
+    order_data = OrderSerializer(order).data
+    return Response(order_data, status=status.HTTP_201_CREATED)
