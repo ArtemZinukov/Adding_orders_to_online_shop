@@ -139,6 +139,9 @@ class Order(models.Model):
     def __str__(self):
         return f"{self.firstname} {self.lastname} - Заказ {self.id}"
 
+    def total_cost(self):
+        total = round(sum(item.product.price * item.quantity for item in self.orderproduct_set.all()))
+        return f'{total} руб.'
 
 class OrderProduct(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, verbose_name="Заказ")
