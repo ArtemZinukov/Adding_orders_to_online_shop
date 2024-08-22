@@ -1,14 +1,39 @@
 import json
+from itertools import product
 
 from django.http import JsonResponse
 from django.templatetags.static import static
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view
 from rest_framework import status
+from rest_framework import serializers
 from rest_framework.response import Response
-
-
+import re
+from rest_framework.serializers import Serializer, ModelSerializer
+from rest_framework.serializers import CharField, ListField
+from rest_framework.exceptions import ValidationError
 from .models import Product, Order, OrderProduct
+
+
+class OrderProductSerializer(ModelSerializer):
+    product = CharField()
+
+    class Meta:
+        model = OrderProduct
+        fields = ['product', 'quantity']
+
+
+class OrderSerializer(ModelSerializer):
+    products = ListField(child=OrderProductSerializer())
+
+    class Meta:
+        model = Order
+        fields = ['id','firstname', 'lastname', 'phonenumber', 'address', 'products']
+
+    def validate_products(self, value):
+        if not value :
+            raise ValidationError('Список продуктов не может быть пустым')
+        return value
 
 
 def banners_list_api(request):
@@ -65,30 +90,23 @@ def product_list_api(request):
 
 @api_view(['POST'])
 def register_order(request):
-    try:
-        order_data = request.data
+    serializer = OrderSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
 
-        if 'products' not in order_data or not order_data['products']:
-            return Response({'error': 'Список продуктов не может быть пустым.'}, status=status.HTTP_400_BAD_REQUEST)
-        order = Order.objects.create(
-            firstname=order_data['firstname'],
-            lastname=order_data['lastname'],
-            phonenumber=order_data['phonenumber'],
-            address=order_data['address']
+
+    order = Order.objects.create(
+        firstname=serializer.validated_data['firstname'],
+        lastname=serializer.validated_data['lastname'],
+        phonenumber=serializer.validated_data['phonenumber'],
+        address=serializer.validated_data['address']
+    )
+
+    for product in serializer.validated_data['products']:
+        product_instance = Product.objects.get(id=product['product'])
+        OrderProduct.objects.create(
+            order=order,
+            product=product_instance,
+            quantity=product['quantity']
         )
 
-        for product in order_data['products']:
-            product_id = product['product']
-            quantity = product['quantity']
-            product_instance = get_object_or_404(Product, id=product_id)
-
-            OrderProduct.objects.create(
-                order=order,
-                product=product_instance,
-                quantity=quantity
-            )
-
-        return Response({'message': 'Заказ успешно создан!', 'order_id': order.id}, status=status.HTTP_201_CREATED)
-
-    except Exception as e:
-        return Response({'error': str(e)}, status=500)
+    return Response({'message': 'Заказ успешно создан!', 'order_id': order.id}, status=status.HTTP_201_CREATED)
