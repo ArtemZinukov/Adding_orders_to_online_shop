@@ -125,7 +125,7 @@ class OrderAdmin(admin.ModelAdmin):
 
     fieldsets = (
         (None, {
-            'fields': ('firstname', 'lastname', 'phonenumber', 'address', 'total_cost', 'status')
+            'fields': ('firstname', 'lastname', 'phonenumber', 'address', 'total_cost', 'status', 'comment')
         }),
     )
 

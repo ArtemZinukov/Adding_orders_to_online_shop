@@ -140,6 +140,7 @@ class Order(models.Model):
     products = models.ManyToManyField(Product, through='OrderProduct', verbose_name="Товары")
     total_cost = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Стоимость заказа", default=0)
     status = models.CharField(max_length=20, choices=ORDER_STATUS_CHOICES, default='accepted', verbose_name="Статус заказа")
+    comment = models.TextField(blank=True, null=True, default='', verbose_name="Комментарий")
 
     class Meta:
         verbose_name = 'заказ'
