@@ -1,15 +1,15 @@
 import json
 from itertools import product
-
+from django.db import transaction
 from django.http import JsonResponse
 from django.templatetags.static import static
-from django.shortcuts import get_object_or_404
+
 from rest_framework.decorators import api_view
 from rest_framework import status
-from rest_framework import serializers
+
 from rest_framework.response import Response
-import re
-from rest_framework.serializers import Serializer, ModelSerializer
+
+from rest_framework.serializers import ModelSerializer
 from rest_framework.serializers import CharField, ListField
 from rest_framework.exceptions import ValidationError
 from .models import Product, Order, OrderProduct
@@ -89,10 +89,10 @@ def product_list_api(request):
 
 
 @api_view(['POST'])
+@transaction.atomic
 def register_order(request):
     serializer = OrderSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-
 
     order = Order.objects.create(
         firstname=serializer.validated_data['firstname'],
@@ -108,6 +108,8 @@ def register_order(request):
             product=product_instance,
             quantity=product['quantity']
         )
+
     order.calculate_total_cost()
+
     order_data = OrderSerializer(order).data
     return Response(order_data, status=status.HTTP_201_CREATED)
