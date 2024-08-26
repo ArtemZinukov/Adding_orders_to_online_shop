@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.shortcuts import reverse
 from django.templatetags.static import static
 from django.utils.html import format_html
+from django.core.exceptions import ValidationError
 
 from .models import Product
 from .models import ProductCategory
@@ -115,13 +116,21 @@ class ProductAdmin(admin.ModelAdmin):
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ('firstname', 'lastname', 'phonenumber', 'address')
+    list_display = ('firstname', 'lastname', 'phonenumber', 'address', 'total_cost')
     search_fields = ('firstname', 'lastname', 'phonenumber')
     list_filter = ('products',)
     inlines = [OrderProductInline]
 
     fieldsets = (
         (None, {
-            'fields': ('firstname', 'lastname', 'phonenumber', 'address', )
+            'fields': ('firstname', 'lastname', 'phonenumber', 'address', 'total_cost')
         }),
     )
+
+    def save_model(self, request, obj, form, change):
+        try:
+            if obj.total_cost < 0:
+                raise ValidationError("Стоимость заказа не может быть отрицательной.")
+            super().save_model(request, obj, form, change)
+        except ValidationError as e:
+            self.message_user(request, str(e), level='error')

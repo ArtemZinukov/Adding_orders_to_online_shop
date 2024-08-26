@@ -108,5 +108,6 @@ def register_order(request):
             product=product_instance,
             quantity=product['quantity']
         )
+    order.calculate_total_cost()
     order_data = OrderSerializer(order).data
     return Response(order_data, status=status.HTTP_201_CREATED)

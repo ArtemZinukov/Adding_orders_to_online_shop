@@ -131,6 +131,7 @@ class Order(models.Model):
     phonenumber = PhoneNumberField(verbose_name="Номер телефона")
     address = models.CharField(max_length=255, verbose_name="Адрес")
     products = models.ManyToManyField(Product, through='OrderProduct', verbose_name="Товары")
+    total_cost = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Стоимость заказа", default=0)
 
     class Meta:
         verbose_name = 'заказ'
@@ -139,9 +140,10 @@ class Order(models.Model):
     def __str__(self):
         return f"{self.firstname} {self.lastname} - Заказ {self.id}"
 
-    def total_cost(self):
-        total = round(sum(item.product.price * item.quantity for item in self.orderproduct_set.all()))
-        return f'{total} руб.'
+    def calculate_total_cost(self):
+        total = sum(item.product.price * item.quantity for item in self.orderproduct_set.all())
+        self.total_cost = round(total, 2)
+        self.save()
 
 class OrderProduct(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, verbose_name="Заказ")
