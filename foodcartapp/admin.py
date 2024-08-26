@@ -4,6 +4,7 @@ from django.templatetags.static import static
 from django.utils.html import format_html
 from django.core.exceptions import ValidationError
 from django.shortcuts import redirect
+from django.shortcuts import render
 
 from .models import Product
 from .models import ProductCategory
@@ -117,14 +118,14 @@ class ProductAdmin(admin.ModelAdmin):
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ('firstname', 'lastname', 'phonenumber', 'address', 'total_cost')
+    list_display = ('id', 'firstname', 'lastname', 'phonenumber', 'address', 'total_cost', 'status')
     search_fields = ('firstname', 'lastname', 'phonenumber')
-    list_filter = ('products',)
+    list_filter = ('products', 'status')
     inlines = [OrderProductInline]
 
     fieldsets = (
         (None, {
-            'fields': ('firstname', 'lastname', 'phonenumber', 'address', 'total_cost')
+            'fields': ('firstname', 'lastname', 'phonenumber', 'address', 'total_cost', 'status')
         }),
     )
 
@@ -141,3 +142,4 @@ class OrderAdmin(admin.ModelAdmin):
             super().save_model(request, obj, form, change)
         except ValidationError as e:
             self.message_user(request, str(e), level='error')
+

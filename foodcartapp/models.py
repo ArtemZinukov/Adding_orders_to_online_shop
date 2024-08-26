@@ -126,12 +126,20 @@ class RestaurantMenuItem(models.Model):
 
 
 class Order(models.Model):
+    ORDER_STATUS_CHOICES = (
+        ('accepted', 'Заказ принят'),
+        ('processing', 'Заказ собирается'),
+        ('delivering', 'Заказ доставляется'),
+        ('completed', 'Выполнен'),
+    )
+
     firstname = models.CharField(max_length=50, verbose_name="Имя")
     lastname = models.CharField(max_length=50, verbose_name="Фамилия")
     phonenumber = PhoneNumberField(verbose_name="Номер телефона")
     address = models.CharField(max_length=255, verbose_name="Адрес")
     products = models.ManyToManyField(Product, through='OrderProduct', verbose_name="Товары")
     total_cost = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Стоимость заказа", default=0)
+    status = models.CharField(max_length=20, choices=ORDER_STATUS_CHOICES, default='accepted', verbose_name="Статус заказа")
 
     class Meta:
         verbose_name = 'заказ'
