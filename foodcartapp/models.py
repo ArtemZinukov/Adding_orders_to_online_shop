@@ -134,6 +134,12 @@ class Order(models.Model):
         ('completed', 'Выполнен'),
     )
 
+    PAYMENT_CHOICES = (
+        ('cash', 'Наличные'),
+        ('card', 'Банковская карта'),
+        ('online', 'Онлайн-оплата'),
+    )
+
     firstname = models.CharField(max_length=50, verbose_name="Имя")
     lastname = models.CharField(max_length=50, verbose_name="Фамилия")
     phonenumber = PhoneNumberField(verbose_name="Номер телефона")
@@ -146,6 +152,8 @@ class Order(models.Model):
     processing_at = models.DateTimeField(blank=True, null=True, verbose_name="Дата и время сборки")
     delivering_at = models.DateTimeField(blank=True, null=True, verbose_name="Дата и время доставки")
     completed_at = models.DateTimeField(blank=True, null=True, verbose_name="Дата и время выполнения")
+    payment_method = models.CharField(max_length=20, choices=PAYMENT_CHOICES, default='cash',
+                                      verbose_name="Способ оплаты")
 
     class Meta:
         verbose_name = 'заказ'
