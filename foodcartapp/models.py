@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.validators import MinValueValidator
 from django.core.exceptions import ValidationError
+from django.utils import timezone
 from phonenumber_field.modelfields import PhoneNumberField
 
 
@@ -141,6 +142,10 @@ class Order(models.Model):
     total_cost = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Стоимость заказа", default=0)
     status = models.CharField(max_length=20, choices=ORDER_STATUS_CHOICES, default='accepted', verbose_name="Статус заказа")
     comment = models.TextField(blank=True, null=True, default='', verbose_name="Комментарий")
+    accepted_at = models.DateTimeField(default=timezone.now, verbose_name="Дата и время принятия")
+    processing_at = models.DateTimeField(blank=True, null=True, verbose_name="Дата и время сборки")
+    delivering_at = models.DateTimeField(blank=True, null=True, verbose_name="Дата и время доставки")
+    completed_at = models.DateTimeField(blank=True, null=True, verbose_name="Дата и время выполнения")
 
     class Meta:
         verbose_name = 'заказ'

@@ -118,14 +118,18 @@ class ProductAdmin(admin.ModelAdmin):
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ('id', 'firstname', 'lastname', 'phonenumber', 'address', 'total_cost', 'status')
+    list_display = (
+    'id', 'firstname', 'lastname', 'phonenumber', 'address', 'total_cost', 'status', 'accepted_at'
+    )
     search_fields = ('firstname', 'lastname', 'phonenumber')
-    list_filter = ('products', 'status')
+    list_filter = ('products', 'status', 'accepted_at', 'processing_at', 'delivering_at', 'completed_at')
     inlines = [OrderProductInline]
 
     fieldsets = (
         (None, {
-            'fields': ('firstname', 'lastname', 'phonenumber', 'address', 'total_cost', 'status', 'comment')
+            'fields': (
+            'firstname', 'lastname', 'phonenumber', 'address', 'total_cost', 'status', 'comment',
+            'accepted_at', 'processing_at', 'delivering_at', 'completed_at')
         }),
     )
 
