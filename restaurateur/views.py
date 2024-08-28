@@ -4,6 +4,7 @@ from django.shortcuts import redirect, render
 from django.views import View
 from django.urls import reverse_lazy
 from django.contrib.auth.decorators import user_passes_test
+from environs import Env
 
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import views as auth_views
@@ -12,6 +13,10 @@ from django.contrib.auth import views as auth_views
 from foodcartapp.models import Product, Restaurant, Order
 from geopy.distance import geodesic
 
+env = Env()
+env.read_env()
+
+YANDEX_API_KEY = env('YANDEX_API_KEY')
 
 class Login(forms.Form):
     username = forms.CharField(
@@ -92,8 +97,6 @@ def view_restaurants(request):
     })
 
 
-yandex_api_key = 'c682211e-34f4-428a-bb9f-da2707dc73d5'
-
 def fetch_coordinates(apikey, address):
     base_url = "https://geocode-maps.yandex.ru/1.x"
     response = requests.get(base_url, params={
@@ -129,8 +132,8 @@ def view_orders(request):
                     restaurants.add(restaurant_name)
 
                     try:
-                        restaurant_coords = fetch_coordinates(yandex_api_key, restaurant_name)
-                        delivery_coords = fetch_coordinates(yandex_api_key, order.address)
+                        restaurant_coords = fetch_coordinates(YANDEX_API_KEY, restaurant_name)
+                        delivery_coords = fetch_coordinates(YANDEX_API_KEY, order.address)
                         if restaurant_coords and delivery_coords:
                             distance = geodesic(restaurant_coords, delivery_coords).kilometers
                             restaurant_distances[restaurant_name] = distance
