@@ -12,7 +12,7 @@ from rest_framework.response import Response
 from rest_framework.serializers import ModelSerializer
 from rest_framework.serializers import CharField, ListField
 from rest_framework.exceptions import ValidationError
-from .models import Product, Order, OrderProduct
+from .models import Product, Order, OrderProduct, Restaurant, RestaurantMenuItem
 
 
 class OrderProductSerializer(ModelSerializer):
@@ -98,8 +98,10 @@ def register_order(request):
         firstname=serializer.validated_data['firstname'],
         lastname=serializer.validated_data['lastname'],
         phonenumber=serializer.validated_data['phonenumber'],
-        address=serializer.validated_data['address']
+        address=serializer.validated_data['address'],
     )
+
+    restaurant_ids = set()
 
     for product in serializer.validated_data['products']:
         product_instance = Product.objects.get(id=product['product'])
@@ -109,7 +111,14 @@ def register_order(request):
             quantity=product['quantity']
         )
 
+        restaurants = RestaurantMenuItem.objects.filter(product=product_instance, availability=True).values_list('restaurant_id', flat=True)
+        restaurant_ids.update(restaurants)
+
+    restaurants = Restaurant.objects.filter(id__in=restaurant_ids)
+
     order.calculate_total_cost()
 
     order_data = OrderSerializer(order).data
-    return Response(order_data, status=status.HTTP_201_CREATED)
+    restaurant_data = [{"id": restaurant.id, "name": restaurant.name} for restaurant in restaurants]
+
+    return Response({"order": order_data, "restaurants": restaurant_data}, status=status.HTTP_201_CREATED)

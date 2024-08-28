@@ -119,7 +119,8 @@ class ProductAdmin(admin.ModelAdmin):
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     list_display = (
-    'id', 'firstname', 'lastname', 'phonenumber', 'address', 'total_cost', 'status', 'payment_method', 'accepted_at'
+    'id', 'firstname', 'lastname', 'phonenumber', 'address', 'total_cost', 'status', 'payment_method', 'accepted_at',
+    'restaurant'
     )
     search_fields = ('firstname', 'lastname', 'phonenumber')
     list_filter = ('products', 'status', 'accepted_at', 'processing_at', 'delivering_at', 'completed_at')
@@ -129,7 +130,7 @@ class OrderAdmin(admin.ModelAdmin):
         (None, {
             'fields': (
             'firstname', 'lastname', 'phonenumber', 'address', 'total_cost', 'status','payment_method', 'comment',
-            'accepted_at', 'processing_at', 'delivering_at', 'completed_at')
+            'restaurant', 'accepted_at', 'processing_at', 'delivering_at', 'completed_at')
         }),
     )
 

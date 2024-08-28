@@ -146,7 +146,8 @@ class Order(models.Model):
     address = models.CharField(max_length=255, verbose_name="Адрес")
     products = models.ManyToManyField(Product, through='OrderProduct', verbose_name="Товары")
     total_cost = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Стоимость заказа", default=0)
-    status = models.CharField(max_length=20, choices=ORDER_STATUS_CHOICES, default='accepted', verbose_name="Статус заказа")
+    status = models.CharField(max_length=20, choices=ORDER_STATUS_CHOICES, default='accepted',
+                              verbose_name="Статус заказа")
     comment = models.TextField(blank=True, null=True, default='', verbose_name="Комментарий")
     accepted_at = models.DateTimeField(default=timezone.now, verbose_name="Дата и время принятия")
     processing_at = models.DateTimeField(blank=True, null=True, verbose_name="Дата и время сборки")
@@ -154,6 +155,7 @@ class Order(models.Model):
     completed_at = models.DateTimeField(blank=True, null=True, verbose_name="Дата и время выполнения")
     payment_method = models.CharField(max_length=20, choices=PAYMENT_CHOICES, default='cash',
                                       verbose_name="Способ оплаты")
+    restaurant = models.ForeignKey(Restaurant, verbose_name='Ресторан', on_delete=models.SET_NULL,null=True, blank=True)
 
     class Meta:
         verbose_name = 'заказ'
