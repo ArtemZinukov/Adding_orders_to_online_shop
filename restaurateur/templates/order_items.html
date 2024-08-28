@@ -36,10 +36,13 @@
           <td>{{ item.phonenumber }}</td>
           <td>{{ item.address }}</td>
           <td>{{ item.comment }}</td>
-          <td>
-            {% for restaurant in restaurants %}
-              {{ restaurant.name }}<br>
-            {% endfor %}
+        <td>
+            {% if item.restaurants %}
+              {{ item.restaurants|join:", " }}
+            {% else %}
+              Нет доступных ресторанов
+            {% endif %}
+          </td>
           <td>
             <a href="{% url 'admin:foodcartapp_order_change' item.id %}?next={{ request.path }}">Редактировать</a>
           </td>

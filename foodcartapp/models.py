@@ -155,7 +155,6 @@ class Order(models.Model):
     completed_at = models.DateTimeField(blank=True, null=True, verbose_name="Дата и время выполнения")
     payment_method = models.CharField(max_length=20, choices=PAYMENT_CHOICES, default='cash',
                                       verbose_name="Способ оплаты")
-    restaurant = models.ForeignKey(Restaurant, verbose_name='Ресторан', on_delete=models.SET_NULL,null=True, blank=True)
 
     class Meta:
         verbose_name = 'заказ'

@@ -119,20 +119,31 @@ class ProductAdmin(admin.ModelAdmin):
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     list_display = (
-    'id', 'firstname', 'lastname', 'phonenumber', 'address', 'total_cost', 'status', 'payment_method', 'accepted_at',
-    'restaurant'
+        'id', 'firstname', 'lastname', 'phonenumber', 'address', 'total_cost', 'status', 'get_restaurants'
     )
     search_fields = ('firstname', 'lastname', 'phonenumber')
-    list_filter = ('products', 'status', 'accepted_at', 'processing_at', 'delivering_at', 'completed_at')
+    list_filter = ('status', 'accepted_at', 'processing_at', 'delivering_at', 'completed_at')
     inlines = [OrderProductInline]
 
     fieldsets = (
         (None, {
             'fields': (
-            'firstname', 'lastname', 'phonenumber', 'address', 'total_cost', 'status','payment_method', 'comment',
-            'restaurant', 'accepted_at', 'processing_at', 'delivering_at', 'completed_at')
+                'firstname', 'lastname', 'phonenumber', 'address', 'total_cost', 'status', 'comment',
+                'accepted_at', 'processing_at', 'delivering_at', 'completed_at'
+            )
         }),
     )
+
+    def get_restaurants(self, obj):
+        restaurants = set()
+        order_products = OrderProduct.objects.filter(order=obj)
+        for order_product in order_products:
+            menu_items = order_product.product.menu_items.filter(availability=True)
+            for menu_item in menu_items:
+                restaurants.add(menu_item.restaurant.name)
+        return ", ".join(restaurants)
+
+    get_restaurants.short_description = 'Рестораны'
 
     def response_change(self, request, obj):
         next_url = request.GET.get('next')

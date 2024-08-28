@@ -101,24 +101,27 @@ def register_order(request):
         address=serializer.validated_data['address'],
     )
 
-    restaurant_ids = set()
+    all_restaurants = None
 
     for product in serializer.validated_data['products']:
         product_instance = Product.objects.get(id=product['product'])
+
         OrderProduct.objects.create(
             order=order,
             product=product_instance,
             quantity=product['quantity']
         )
 
-        restaurants = RestaurantMenuItem.objects.filter(product=product_instance, availability=True).values_list('restaurant_id', flat=True)
-        restaurant_ids.update(restaurants)
+        product_restaurants = set(
+            RestaurantMenuItem.objects.filter(product=product_instance, availability=True).values_list(
+                'restaurant__name', flat=True))
 
-    restaurants = Restaurant.objects.filter(id__in=restaurant_ids)
+        if all_restaurants is None:
+            all_restaurants = product_restaurants
+        else:
+            all_restaurants = all_restaurants.intersection(product_restaurants)
 
     order.calculate_total_cost()
-
     order_data = OrderSerializer(order).data
-    restaurant_data = [{"id": restaurant.id, "name": restaurant.name} for restaurant in restaurants]
 
-    return Response({"order": order_data, "restaurants": restaurant_data}, status=status.HTTP_201_CREATED)
+    return Response({"order": order_data, "restaurants": list(all_restaurants)}, status=status.HTTP_201_CREATED)
