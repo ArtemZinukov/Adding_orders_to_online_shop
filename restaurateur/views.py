@@ -111,8 +111,6 @@ def fetch_coordinates(apikey, address):
     lon, lat = most_relevant['GeoObject']['Point']['pos'].split(" ")
     return float(lat), float(lon)
 
-def calculate_distance(restaurant_coords, delivery_coords):
-    return geodesic(restaurant_coords, delivery_coords).kilometers
 
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
@@ -134,7 +132,7 @@ def view_orders(request):
                         restaurant_coords = fetch_coordinates(yandex_api_key, restaurant_name)
                         delivery_coords = fetch_coordinates(yandex_api_key, order.address)
                         if restaurant_coords and delivery_coords:
-                            distance = calculate_distance(restaurant_coords, delivery_coords)
+                            distance = geodesic(restaurant_coords, delivery_coords).kilometers
                             restaurant_distances[restaurant_name] = distance
                     except Exception as e:
                         print(f"Ошибка при получении координат для {restaurant_name}: {e}")
