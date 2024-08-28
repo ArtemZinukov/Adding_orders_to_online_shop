@@ -22,11 +22,13 @@
       <th>Адрес доставки</th>
       <th>Комментарий</th>
       <th>Рестораны</th>
+      <th>Ближайший ресторан</th>
+      <th>Расстояние до ближайшего ресторана (км)</th>
       <th>Ссылка на админку</th>
     </tr>
 
     {% for item in order_items %}
-      {% if item.status != 'completed'  %}
+      {% if item.status != 'completed' %}
         <tr>
           <td>{{ item.id }}</td>
           <td>{{ item.get_status_display }}</td>
@@ -36,11 +38,25 @@
           <td>{{ item.phonenumber }}</td>
           <td>{{ item.address }}</td>
           <td>{{ item.comment }}</td>
-        <td>
+          <td>
             {% if item.restaurants %}
               {{ item.restaurants|join:", " }}
             {% else %}
               Нет доступных ресторанов
+            {% endif %}
+          </td>
+          <td>
+            {% if item.closest_restaurant %}
+              {{ item.closest_restaurant }}
+            {% else %}
+              Нет ближайшего ресторана
+            {% endif %}
+          </td>
+          <td>
+            {% if item.closest_distance is not None %}
+              {{ item.closest_distance|floatformat:2 }} км
+            {% else %}
+              Невозможно рассчитать
             {% endif %}
           </td>
           <td>

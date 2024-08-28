@@ -1,3 +1,4 @@
+import requests
 from django import forms
 from django.shortcuts import redirect, render
 from django.views import View
@@ -8,7 +9,8 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth import views as auth_views
 
 
-from foodcartapp.models import Product, Restaurant, Order, RestaurantMenuItem
+from foodcartapp.models import Product, Restaurant, Order
+from geopy.distance import geodesic
 
 
 class Login(forms.Form):
@@ -90,6 +92,28 @@ def view_restaurants(request):
     })
 
 
+yandex_api_key = 'c682211e-34f4-428a-bb9f-da2707dc73d5'
+
+def fetch_coordinates(apikey, address):
+    base_url = "https://geocode-maps.yandex.ru/1.x"
+    response = requests.get(base_url, params={
+        "geocode": address,
+        "apikey": apikey,
+        "format": "json",
+    })
+    response.raise_for_status()
+    found_places = response.json()['response']['GeoObjectCollection']['featureMember']
+
+    if not found_places:
+        return None
+
+    most_relevant = found_places[0]
+    lon, lat = most_relevant['GeoObject']['Point']['pos'].split(" ")
+    return float(lat), float(lon)
+
+def calculate_distance(restaurant_coords, delivery_coords):
+    return geodesic(restaurant_coords, delivery_coords).kilometers
+
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
     order_items = Order.objects.prefetch_related(
@@ -98,11 +122,32 @@ def view_orders(request):
 
     for order in order_items:
         restaurants = set()
+        restaurant_distances = {}
+
         for order_product in order.orderproduct_set.all():
             for menu_item in order_product.product.menu_items.all():
                 if menu_item.availability:
-                    restaurants.add(menu_item.restaurant.name)
+                    restaurant_name = menu_item.restaurant.name
+                    restaurants.add(restaurant_name)
+
+                    try:
+                        restaurant_coords = fetch_coordinates(yandex_api_key, restaurant_name)
+                        delivery_coords = fetch_coordinates(yandex_api_key, order.address)
+                        if restaurant_coords and delivery_coords:
+                            distance = calculate_distance(restaurant_coords, delivery_coords)
+                            restaurant_distances[restaurant_name] = distance
+                    except Exception as e:
+                        print(f"Ошибка при получении координат для {restaurant_name}: {e}")
+
         order.restaurants = list(restaurants)
+
+        if restaurant_distances:
+            closest_restaurant = min(restaurant_distances, key=restaurant_distances.get)
+            order.closest_restaurant = closest_restaurant
+            order.closest_distance = restaurant_distances[closest_restaurant]
+        else:
+            order.closest_restaurant = None
+            order.closest_distance = None
 
     return render(request, template_name='order_items.html', context={
         'order_items': order_items,
