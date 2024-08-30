@@ -1,4 +1,13 @@
-django==3.2.15
+dj-database-url==2.2.0
+dj-email-url==1.0.6
+Django==3.2.15
 django-debug-toolbar==3.2.1
-Pillow==8.2.0
-environs[django]==9.3.2
+django-phonenumber-field==8.0.0
+djangorestframework==3.12.4
+environs==9.3.2
+geographiclib==2.0
+geopy==2.4.1
+phonenumbers==8.13.43
+pillow==10.4.0
+python-dotenv==1.0.1
+yandex-geocoder==3.0.1

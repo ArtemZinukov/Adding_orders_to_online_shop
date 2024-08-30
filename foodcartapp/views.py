@@ -1,5 +1,3 @@
-import json
-from itertools import product
 from django.db import transaction
 from django.http import JsonResponse
 from django.templatetags.static import static
@@ -12,7 +10,7 @@ from rest_framework.response import Response
 from rest_framework.serializers import ModelSerializer
 from rest_framework.serializers import CharField, ListField
 from rest_framework.exceptions import ValidationError
-from .models import Product, Order, OrderProduct, Restaurant, RestaurantMenuItem
+from .models import Product, Order, OrderProduct, RestaurantMenuItem
 
 
 class OrderProductSerializer(ModelSerializer):

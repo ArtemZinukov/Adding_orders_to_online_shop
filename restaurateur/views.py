@@ -12,6 +12,7 @@ from django.contrib.auth import views as auth_views
 
 from foodcartapp.models import Product, Restaurant, Order
 from geopy.distance import geodesic
+from distance_tracker.models import Distance
 
 env = Env()
 env.read_env()
@@ -118,7 +119,8 @@ def fetch_coordinates(apikey, address):
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
     order_items = Order.objects.prefetch_related(
-        'orderproduct_set__product__menu_items__restaurant'
+        'orderproduct_set__product__menu_items__restaurant',
+        'distances'
     ).all()
 
     for order in order_items:
@@ -131,14 +133,23 @@ def view_orders(request):
                     restaurant_name = menu_item.restaurant.name
                     restaurants.add(restaurant_name)
 
-                    try:
-                        restaurant_coords = fetch_coordinates(YANDEX_API_KEY, restaurant_name)
-                        delivery_coords = fetch_coordinates(YANDEX_API_KEY, order.address)
-                        if restaurant_coords and delivery_coords:
-                            distance = geodesic(restaurant_coords, delivery_coords).kilometers
-                            restaurant_distances[restaurant_name] = distance
-                    except Exception as e:
-                        print(f"Ошибка при получении координат для {restaurant_name}: {e}")
+                    distance_record, created = order.distances.get_or_create(
+                        restaurant_name=restaurant_name,
+                        defaults={'distance_km': 0.0},
+                    )
+
+                    if created:
+                        try:
+                            restaurant_coords = fetch_coordinates(YANDEX_API_KEY, restaurant_name)
+                            delivery_coords = fetch_coordinates(YANDEX_API_KEY, order.address)
+                            if restaurant_coords and delivery_coords:
+                                distance = geodesic(restaurant_coords, delivery_coords).kilometers
+                                distance_record.distance_km = distance
+                                distance_record.save()
+                        except Exception as e:
+                            print(f"Ошибка при получении координат для {restaurant_name}: {e}")
+
+                    restaurant_distances[restaurant_name] = distance_record.distance_km
 
         order.restaurants = list(restaurants)
 
