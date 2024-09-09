@@ -171,7 +171,7 @@ class Order(models.Model):
 class OrderProduct(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, verbose_name="Заказ")
     product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name="Продукт")
-    quantity = models.PositiveIntegerField(default=1, verbose_name="Количество")
+    quantity = models.PositiveIntegerField(default=1, verbose_name="Количество", validators=[MinValueValidator(1)])
 
     class Meta:
         unique_together = ('order', 'product')
