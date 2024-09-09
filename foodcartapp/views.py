@@ -4,38 +4,13 @@ from django.templatetags.static import static
 
 from rest_framework.decorators import api_view
 from rest_framework import status
-
 from rest_framework.response import Response
 
-from rest_framework.serializers import ModelSerializer
-from rest_framework.serializers import CharField, ListField
-from rest_framework.exceptions import ValidationError
+from .serializers import OrderSerializer
 from .models import Product, Order, OrderProduct, RestaurantMenuItem
 
 
-class OrderProductSerializer(ModelSerializer):
-    product = CharField()
-
-    class Meta:
-        model = OrderProduct
-        fields = ['product', 'quantity']
-
-
-class OrderSerializer(ModelSerializer):
-    products = ListField(child=OrderProductSerializer(), write_only=True)
-
-    class Meta:
-        model = Order
-        fields = ['id','firstname', 'lastname', 'phonenumber', 'address', 'products']
-
-    def validate_products(self, value):
-        if not value :
-            raise ValidationError('Список продуктов не может быть пустым')
-        return value
-
-
 def banners_list_api(request):
-    # FIXME move data to db?
     return JsonResponse([
         {
             'title': 'Burger',
