@@ -66,35 +66,7 @@ def product_list_api(request):
 def register_order(request):
     serializer = OrderSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-
-    order = Order.objects.create(
-        firstname=serializer.validated_data['firstname'],
-        lastname=serializer.validated_data['lastname'],
-        phonenumber=serializer.validated_data['phonenumber'],
-        address=serializer.validated_data['address'],
-    )
-
-    all_restaurants = None
-
-    for product in serializer.validated_data['products']:
-        product_instance = Product.objects.get(id=product['product'])
-
-        OrderProduct.objects.create(
-            order=order,
-            product=product_instance,
-            quantity=product['quantity']
-        )
-
-        product_restaurants = set(
-            RestaurantMenuItem.objects.filter(product=product_instance, availability=True).values_list(
-                'restaurant__name', flat=True))
-
-        if all_restaurants is None:
-            all_restaurants = product_restaurants
-        else:
-            all_restaurants = all_restaurants.intersection(product_restaurants)
-
-    order.calculate_total_cost()
+    order = serializer.save()
     order_data = OrderSerializer(order).data
 
-    return Response({"order": order_data, "restaurants": list(all_restaurants)}, status=status.HTTP_201_CREATED)
+    return Response({"order": order_data}, status=status.HTTP_201_CREATED)
