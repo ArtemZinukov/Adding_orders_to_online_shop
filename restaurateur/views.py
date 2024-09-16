@@ -138,17 +138,6 @@ def view_orders(request):
                         defaults={'distance_km': 0.0},
                     )
 
-                    if created:
-                        try:
-                            restaurant_coords = fetch_coordinates(YANDEX_API_KEY, restaurant_name)
-                            delivery_coords = fetch_coordinates(YANDEX_API_KEY, order.address)
-                            if restaurant_coords and delivery_coords:
-                                distance = geodesic(restaurant_coords, delivery_coords).kilometers
-                                distance_record.distance_km = distance
-                                distance_record.save()
-                        except Exception as e:
-                            print(f"Ошибка при получении координат для {restaurant_name}: {e}")
-
                     restaurant_distances[restaurant_name] = distance_record.distance_km
 
         order.restaurants = list(restaurants)
