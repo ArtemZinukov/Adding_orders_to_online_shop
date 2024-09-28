@@ -11,3 +11,5 @@ phonenumbers==8.13.43
 pillow==10.4.0
 python-dotenv==1.0.1
 yandex-geocoder==3.0.1
+rollbar==1.0.0
+
