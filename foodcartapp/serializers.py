@@ -10,12 +10,14 @@ env.read_env()
 
 YANDEX_API_KEY = env('YANDEX_API_KEY')
 
+
 class OrderProductSerializer(serializers.ModelSerializer):
     product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())
 
     class Meta:
         model = OrderProduct
         fields = ['product', 'quantity']
+
 
 class OrderSerializer(serializers.ModelSerializer):
     products = OrderProductSerializer(many=True, write_only=True)
