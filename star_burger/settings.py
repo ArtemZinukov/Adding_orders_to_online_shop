@@ -45,7 +45,7 @@ MIDDLEWARE = [
 ]
 
 ROLLBAR = {
-    'access_token': env('ROLLBAR_TOKEN'),
+    'access_token': env('ROLLBAR_TOKEN', ' '),
     'environment': env('ROLLBAR_ENVIRONMENT_NAME', 'production'),
     'code_version': '1.0',
     'root': BASE_DIR,
@@ -90,11 +90,7 @@ WSGI_APPLICATION = 'star_burger.wsgi.application'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
-# DATABASES = {
-#     'default': dj_database_url.config(
-#         default='sqlite:////{0}'.format(os.path.join(BASE_DIR, 'db.sqlite3'))
-#     )
-# }
+
 DATABASES = {
     'default': dj_database_url.config(default=env('DATABASE_URL'))
 }
