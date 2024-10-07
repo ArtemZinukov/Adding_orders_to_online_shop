@@ -146,3 +146,10 @@ cython_debug/
 images/
 
 .idea
+et --hard
+foodcartapp/migrations/0050_alter_order_comment.py
+sqlite_dump.json
+star_burger/sqlite_dump.json
+static/
+staticfiles/
+ystemctl status nginx.serviceq
