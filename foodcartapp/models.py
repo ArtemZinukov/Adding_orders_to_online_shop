@@ -85,7 +85,7 @@ class Product(models.Model):
         max_length=200,
         blank=True,
     )
-
+    restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE)
     objects = ProductQuerySet.as_manager()
 
     class Meta:
@@ -148,7 +148,7 @@ class Order(models.Model):
     total_cost = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Стоимость заказа", default=0)
     status = models.CharField(max_length=20, choices=ORDER_STATUS_CHOICES, default='accepted',
                               verbose_name="Статус заказа")
-    comment = models.TextField(blank=True, null=True, verbose_name="Комментарий")
+    comment = models.TextField(verbose_name="Комментарий")
     accepted_at = models.DateTimeField(default=timezone.now, verbose_name="Дата и время принятия")
     processing_at = models.DateTimeField(blank=True, null=True, verbose_name="Дата и время сборки")
     delivering_at = models.DateTimeField(blank=True, null=True, verbose_name="Дата и время доставки")
