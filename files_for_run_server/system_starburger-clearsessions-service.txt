@@ -1,0 +1,12 @@
+[Unit]
+Description=Clear Django Sessions
+
+[Service]
+Type=oneshot
+ExecStart=/opt/Adding_orders_to_online_shop/env/bin/python3 /opt/Adding_orders_to_online_shop/manage.py clearsessions
+WorkingDirectory=/opt/Adding_orders_to_online_shop
+User=root
+Group=root
+
+[Install]
+WantedBy=multi-user.target

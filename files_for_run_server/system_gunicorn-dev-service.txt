@@ -1,0 +1,23 @@
+[Unit]
+Description=gunicorn-dev daemon
+Requires=postgresql.service
+After=network.target
+
+[Service]
+User=root
+Group=root
+WorkingDirectory=/opt/Adding_orders_to_online_shop/
+Environment="DJ_DEBUG=False"
+Environment="DJ_ALLOWED_HOSTS=127.0.0.1"
+ExecStart=/opt/Adding_orders_to_online_shop/env/bin/gunicorn -w 3 -b 127.0.0.1:8081 star_burger.wsgi:application
+
+ExecReload=/bin/kill -s HUP $MAINPID
+KillMode=mixed
+TimeoutStopSec=5
+PrivateTmp=true
+Restart=on-failure
+RestartSec=2
+
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,41 @@
+server {
+    server_name www.zinukov-a.ru zinukov-a.ru;
+
+    location / {
+      include '/etc/nginx/proxy_params';
+      proxy_pass http://127.0.0.1:8081/;
+    }
+
+    location /static/ {
+      root /opt/Adding_orders_to_online_shop/;
+    }
+
+    location /media/ {
+      root /opt/Adding_orders_to_online_shop/;
+    }
+
+
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/zinukov-a.ru/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/zinukov-a.ru/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+
+}
+server {
+    if ($host = www.zinukov-a.ru) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+    if ($host = zinukov-a.ru) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+    server_name www.zinukov-a.ru zinukov-a.ru;
+    listen *:80;
+    return 404; # managed by Certbot
+
+}
