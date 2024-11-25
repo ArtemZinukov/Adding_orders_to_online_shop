@@ -1,0 +1,66 @@
+version: '3'
+
+volumes:
+  db_data:
+  static:
+  media:
+
+services:
+  web:
+    container_name: star_burger
+    build:
+      context: ../
+      dockerfile: docker_local/Dockerfile
+    volumes:
+      - ..:/app
+      - static:/app/static
+      - media:/app/media
+    env_file:
+      - ../.env
+    expose:
+      - "8000"
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+      - parcel
+    command: sh -c "python manage.py collectstatic --no-input &&
+      python manage.py makemigrations &&
+      python manage.py migrate &&
+      python manage.py runserver 0.0.0.0:8000"
+
+  postgres:
+    image: postgres:13.0-alpine
+    container_name: postgres
+    restart: always
+    env_file:
+      - ../.env
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5435:5432"
+
+  parcel:
+    image: node:16-alpine
+    working_dir: /code
+    command: /bin/sh -c "npm ci --dev && ./node_modules/.bin/parcel build bundles-src/index.js --dist-dir bundles --public-url='./'"
+    volumes:
+      - ..:/code
+    env_file:
+      - ../.env
+
+  nginx:
+    container_name: nginx
+    working_dir: /app
+    image: nginx:stable-alpine
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - static:/app/static
+      - media:/app/media
+      - ./docker_local/nginx/:/etc/nginx/conf.d
+    links:
+      - web
+    depends_on:
+      - web
