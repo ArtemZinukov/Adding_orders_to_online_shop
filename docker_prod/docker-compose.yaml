@@ -1,18 +1,12 @@
-volumes:
-  db_data:
-  static:
-  media:
+version: '3'
 
 services:
   web:
     container_name: star_burger
     build:
-      context: ../
-      dockerfile: docker_local/Dockerfile
-    volumes:
-      - ..:/app
-      - static:/app/static
-      - media:/app/media
+      context: ..
+      dockerfile: docker_prod/Dockerfile
+    restart: always
     env_file:
       - ../.env
     expose:
@@ -25,7 +19,10 @@ services:
     command: sh -c "python manage.py collectstatic --no-input &&
       python manage.py makemigrations &&
       python manage.py migrate &&
-      python manage.py runserver 0.0.0.0:8000"
+      gunicorn -w 3 -b 0.0.0.0:8000 star_burger.wsgi:application"
+    volumes:
+      - ../static:/app/static
+      - ../media:/app/media
 
   postgres:
     image: postgres:13.0-alpine
@@ -36,7 +33,7 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
     ports:
-      - "5435:5432"
+      - "5432:5432"
 
   parcel:
     image: node:16-alpine
@@ -47,18 +44,5 @@ services:
     env_file:
       - ../.env
 
-  nginx:
-    container_name: nginx
-    working_dir: /app
-    image: nginx:stable-alpine
-    restart: always
-    ports:
-      - "80:80"
-    volumes:
-      - static:/app/static
-      - media:/app/media
-      - ./docker_local/nginx/:/etc/nginx/conf.d
-    links:
-      - web
-    depends_on:
-      - web
+volumes:
+  db_data:
