@@ -73,12 +73,12 @@ server {
     }
 
     location /static/ {
-        alias  /opt/Adding_orders_to_online_shop/static;
+        alias  /opt/star-burger/static;
         expires 15d;
     }
 
      location /media/ {
-        alias  /opt/Adding_orders_to_online_shop/media;
+        alias  /opt/star-burger/media;
         expires 7d;
     }
 }"
@@ -92,7 +92,7 @@ curl -I https://$DOMAIN
 openssl s_client -connect $DOMAIN:443 -servername $DOMAIN
 
 echo "Создание и запуск Docker-контейнеров..."
-cd /opt/Adding_orders_to_online_shop/docker_prod
+cd /opt/star-burger/docker_prod
 docker compose up -d --build
 
 echo "Развертывание успешно завершено."
