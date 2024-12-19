@@ -65,6 +65,8 @@ server {
     server_name www.zinukov-a.ru zinukov-a.ru;
     ssl_certificate /etc/letsencrypt/live/$DOMAIN/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/$DOMAIN/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
     location / {
         proxy_pass http://localhost:8000;
         proxy_set_header Host \$host;
@@ -73,12 +75,12 @@ server {
     }
 
     location /static/ {
-        alias  /opt/star-burger/static;
+        alias  /opt/star-burger/static/;
         expires 15d;
     }
 
      location /media/ {
-        alias  /opt/star-burger/media;
+        alias  /opt/star-burger/media/;
         expires 7d;
     }
 }"
@@ -93,7 +95,7 @@ openssl s_client -connect $DOMAIN:443 -servername $DOMAIN
 
 echo "Создание и запуск Docker-контейнеров..."
 cd /opt/star-burger/docker_prod
-docker compose up -d --build
+docker-compose up -d --build
 
 echo "Развертывание успешно завершено."
 

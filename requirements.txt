@@ -13,3 +13,4 @@ python-dotenv==1.0.1
 yandex-geocoder==3.0.1
 rollbar==1.0.0
 psycopg2==2.9.9
+gunicorn
